@@ -28,6 +28,28 @@
 - **快捷拉黑**：在战绩详情页或对局结算页点击「拉黑」。
 - **手动添加**：在黑名单管理页中，输入完整的 **Riot ID**（如 `玩家名#12345`）手动添加。
 
+## 黑名单命中效果
+
+截图使用示例玩家和对局。英雄头像来自 Riot Data Dragon。 [Data Dragon 文档](https://developer.riotgames.com/docs/lol#data-dragon)
+
+### 选人提醒
+
+识别到黑名单玩家时，提醒卡显示玩家的 Riot ID 和拉黑原因。点击提醒可以查看本局命中。
+
+![选人阶段显示黑名单命中提醒](docs/screenshots/champion-select-hit.png)
+
+### 聊天框旁的提示
+
+命中提示显示在聊天输入框上方，仅自己可见。
+
+![选人聊天框上方的黑名单本地提示](docs/screenshots/chat-reminder.png)
+
+### 加载弹窗
+
+进入加载阶段时，弹窗会列出命中的黑名单玩家，显示拉黑时的英雄、本局英雄和拉黑原因。
+
+![加载阶段弹出两条黑名单命中记录](docs/screenshots/loading-hits.png)
+
 ## 数据保存
 
 - **本地存储**：所有黑名单记录及设置均保存在本机，默认提醒**仅自己可见**。
