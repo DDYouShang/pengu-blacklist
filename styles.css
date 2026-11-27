@@ -834,12 +834,26 @@
   white-space: nowrap;
 }
 
+#pgbl-root .pgbl-card__champions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px 12px;
+  margin-top: 8px;
+}
+
 #pgbl-root .pgbl-card__champion-history {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
   margin-top: 8px;
+}
+
+#pgbl-root .pgbl-card__champions > .pgbl-card__champion-history {
+  min-width: 0;
+  max-width: 100%;
+  margin-top: 0;
 }
 
 #pgbl-root .pgbl-card__champion {
@@ -885,15 +899,10 @@
 }
 
 #pgbl-root .pgbl-card__champion-history--empty .pgbl-card__champion-label,
-#pgbl-root .pgbl-card__champion-history--empty .pgbl-card__champion-name,
-#pgbl-root .pgbl-card__current-champion {
+#pgbl-root .pgbl-card__champion-history--empty .pgbl-card__champion-name {
   color: #a9b4c2;
   font-size: 11px;
   font-weight: 400;
-}
-
-#pgbl-root .pgbl-card__current-champion {
-  margin-top: 4px;
 }
 
 #pgbl-root .pgbl-card__reason {
