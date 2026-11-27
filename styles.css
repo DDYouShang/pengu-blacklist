@@ -1,0 +1,1251 @@
+/* ==========================================================================
+   Pengu 黑名单插件样式
+   全部以 #pgbl-root / .pgbl- 前缀，避免污染客户端自身样式。
+   ========================================================================== */
+
+#pgbl-root {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  pointer-events: none;
+  font-family: 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', 'Spiegel', sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #f0e6d2;
+  text-align: left;
+}
+
+#pgbl-root *,
+#pgbl-root *::before,
+#pgbl-root *::after {
+  box-sizing: border-box;
+}
+
+/* ------------------------------ 右上角入口 ------------------------------ */
+
+.pgbl-launcher {
+  position: fixed;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid rgba(200, 170, 110, 0.55);
+  border-radius: 13px;
+  background: rgba(10, 12, 18, 0.72);
+  color: #c8aa6e;
+  font-size: 12px;
+  cursor: grab;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease, background 0.15s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+}
+
+.pgbl-launcher--in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.pgbl-launcher.is-dragging {
+  cursor: grabbing;
+  transition: none;
+}
+
+:root:has(.pgbl-launcher[data-pgbl-launcher-current]) .pgbl-launcher:not([data-pgbl-launcher-current]) {
+  display: none !important;
+}
+
+.pgbl-launcher:hover {
+  background: rgba(200, 170, 110, 0.16);
+  border-color: #c8aa6e;
+}
+
+.pgbl-launcher.has-hits {
+  border-color: #e05a5a;
+  color: #ff8f8f;
+  box-shadow: 0 0 0 1px rgba(224, 90, 90, 0.25), 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.pgbl-launcher.has-hits:hover {
+  background: rgba(224, 90, 90, 0.18);
+}
+
+.pgbl-launcher.has-familiar {
+  border-color: #5aa6e0;
+  color: #8fc6ff;
+  box-shadow: 0 0 0 1px rgba(90, 166, 224, 0.22), 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.pgbl-launcher.has-familiar:hover {
+  background: rgba(90, 166, 224, 0.18);
+}
+
+/* 面板打开时把入口收起来：入口和面板右上角的关闭按钮位置可能重叠，
+   两者叠在一起既难看又容易误点。 */
+#pgbl-root:has(.pgbl-overlay--open:not(.pgbl-overlay--closing)) .pgbl-launcher {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pgbl-launcher__icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.pgbl-launcher__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: #e05a5a;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* ------------------------------ 遮罩 / 弹窗 ------------------------------ */
+
+.pgbl-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none; /* 未显示时绝不拦截点击 */
+  transition: opacity 0.12s ease;
+}
+
+.pgbl-overlay--open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.pgbl-overlay--closing {
+  opacity: 0;
+}
+
+.pgbl-modal {
+  display: flex;
+  flex-direction: column;
+  max-width: calc(100vw - 48px);
+  max-height: min(82vh, 720px);
+  border: 1px solid rgba(200, 170, 110, 0.65);
+  border-radius: 6px;
+  background: linear-gradient(160deg, #141a24 0%, #0b0f16 55%, #10151d 100%);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  outline: none;
+  overflow: hidden;
+}
+
+.pgbl-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid rgba(200, 170, 110, 0.18);
+}
+
+.pgbl-modal__titles {
+  min-width: 0;
+}
+
+.pgbl-modal__title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: #f0e6d2;
+  letter-spacing: 0.5px;
+}
+
+.pgbl-modal__subtitle {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #8a97a8;
+}
+
+.pgbl-modal__body {
+  padding: 14px 18px 6px;
+  overflow-y: auto;
+}
+
+.pgbl-modal__body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.pgbl-modal__body::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: rgba(200, 170, 110, 0.3);
+}
+
+.pgbl-modal__footer {
+  padding: 12px 18px 16px;
+  border-top: 1px solid rgba(200, 170, 110, 0.18);
+}
+
+.pgbl-iconbtn {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #8a97a8;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pgbl-iconbtn:hover {
+  border-color: rgba(200, 170, 110, 0.4);
+  color: #c8aa6e;
+}
+
+/* ------------------------------ 按钮 ------------------------------ */
+
+#pgbl-root .pgbl-btn {
+  height: 30px;
+  padding: 0 14px;
+  border: 1px solid rgba(200, 170, 110, 0.55);
+  border-radius: 4px;
+  background: rgba(200, 170, 110, 0.08);
+  color: #c8aa6e;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+#pgbl-root .pgbl-btn:hover {
+  background: rgba(200, 170, 110, 0.2);
+}
+
+#pgbl-root .pgbl-btn--primary {
+  background: #c8aa6e;
+  color: #0b0f16;
+  font-weight: 600;
+}
+
+#pgbl-root .pgbl-btn--primary:hover {
+  background: #e0c88f;
+}
+
+#pgbl-root .pgbl-btn--ghost {
+  border-color: rgba(138, 151, 168, 0.45);
+  color: #a9b4c2;
+  background: transparent;
+}
+
+#pgbl-root .pgbl-btn--ghost:hover {
+  border-color: rgba(200, 170, 110, 0.5);
+  color: #c8aa6e;
+}
+
+#pgbl-root .pgbl-btn--danger-ghost {
+  border-color: rgba(224, 90, 90, 0.5);
+  color: #e08a8a;
+  background: transparent;
+}
+
+#pgbl-root .pgbl-btn--danger-ghost:hover {
+  background: rgba(224, 90, 90, 0.14);
+}
+
+#pgbl-root .pgbl-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#pgbl-root .pgbl-spacer {
+  flex: 1;
+}
+
+#pgbl-root .pgbl-linkbtn {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #8a97a8;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+#pgbl-root .pgbl-linkbtn:hover {
+  color: #c8aa6e;
+}
+
+#pgbl-root .pgbl-linkbtn--danger:hover {
+  color: #e05a5a;
+}
+
+/* ------------------------------ 玩家信息 / 表单 ------------------------------ */
+
+#pgbl-root .pgbl-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#pgbl-root .pgbl-player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid rgba(200, 170, 110, 0.22);
+  border-radius: 5px;
+  background: rgba(200, 170, 110, 0.05);
+}
+
+#pgbl-root .pgbl-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(200, 170, 110, 0.6);
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #2a3444, #131a24);
+  color: #c8aa6e;
+  font-size: 16px;
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+
+#pgbl-root .pgbl-player__main {
+  min-width: 0;
+}
+
+#pgbl-root .pgbl-player__name {
+  overflow: hidden;
+  color: #f0e6d2;
+  font-size: 15px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#pgbl-root .pgbl-player__meta {
+  margin-top: 2px;
+  color: #8a97a8;
+  font-size: 12px;
+}
+
+#pgbl-root .pgbl-info {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 16px;
+}
+
+#pgbl-root .pgbl-info__row {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+}
+
+#pgbl-root .pgbl-info__label {
+  color: #6f7b8b;
+  flex: 0 0 52px;
+}
+
+#pgbl-root .pgbl-info__value {
+  overflow: hidden;
+  color: #d6dbe3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#pgbl-root .pgbl-label {
+  color: #a9b4c2;
+  font-size: 12px;
+}
+
+#pgbl-root .pgbl-textarea {
+  width: 100%;
+  min-height: 76px;
+  padding: 9px 10px;
+  border: 1px solid rgba(200, 170, 110, 0.3);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  color: #f0e6d2;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+}
+
+#pgbl-root .pgbl-textarea:focus {
+  border-color: rgba(200, 170, 110, 0.75);
+  box-shadow: 0 0 0 2px rgba(200, 170, 110, 0.12);
+}
+
+#pgbl-root .pgbl-textarea::placeholder {
+  color: #5d6773;
+}
+
+#pgbl-root .pgbl-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+#pgbl-root .pgbl-chip {
+  padding: 3px 10px;
+  border: 1px solid rgba(138, 151, 168, 0.35);
+  border-radius: 12px;
+  background: transparent;
+  color: #a9b4c2;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+#pgbl-root .pgbl-chip:hover {
+  border-color: rgba(200, 170, 110, 0.7);
+  color: #c8aa6e;
+}
+
+#pgbl-root .pgbl-error {
+  min-height: 16px;
+  margin: 0;
+  color: #e05a5a;
+  font-size: 12px;
+}
+
+#pgbl-root .pgbl-hint {
+  margin: 0;
+  color: #5d6773;
+  font-size: 11px;
+}
+
+/* ------------------------------ 手动添加表单 ------------------------------ */
+
+#pgbl-root .pgbl-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px dashed rgba(200, 170, 110, 0.4);
+  border-radius: 5px;
+  background: rgba(200, 170, 110, 0.04);
+}
+
+#pgbl-root .pgbl-add-form__row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 8px;
+}
+
+#pgbl-root .pgbl-champion-picker__field {
+  position: relative;
+}
+
+#pgbl-root .pgbl-champion-picker__field input {
+  padding-right: 23px;
+}
+
+#pgbl-root .pgbl-champion-picker__field span {
+  position: absolute;
+  top: 5px;
+  right: 9px;
+  color: #a9b4c2;
+  pointer-events: none;
+}
+
+#pgbl-root .pgbl-champion-options {
+  max-height: 142px;
+  overflow-y: auto;
+  margin-top: 4px;
+  border: 1px solid rgba(138, 151, 168, 0.38);
+  border-radius: 4px;
+  background: #10141c;
+}
+
+#pgbl-root .pgbl-champion-options__option,
+#pgbl-root .pgbl-champion-options__status {
+  width: 100%;
+  padding: 5px 8px;
+  color: #d6dbe3;
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+}
+
+#pgbl-root .pgbl-champion-options__option {
+  display: block;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+#pgbl-root .pgbl-champion-options__option:hover,
+#pgbl-root .pgbl-champion-options__option[aria-selected="true"] {
+  background: rgba(200, 170, 110, 0.16);
+  color: #f0e6d2;
+}
+
+@media (max-width: 520px) {
+  #pgbl-root .pgbl-add-form__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+#pgbl-root .pgbl-add-form__input {
+  width: 100%;
+  height: 28px;
+}
+
+#pgbl-root .pgbl-add-form__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#pgbl-root .pgbl-add-form__actions .pgbl-error {
+  min-height: 0;
+}
+
+/* ------------------------------ 面板 / 列表 ------------------------------ */
+
+#pgbl-root .pgbl-modal--blacklist {
+  height: 560px;
+  max-height: min(82vh, calc(100vh - 48px));
+}
+
+#pgbl-root .pgbl-modal--blacklist > .pgbl-modal__header,
+#pgbl-root .pgbl-modal--blacklist > .pgbl-modal__footer {
+  flex: none;
+}
+
+#pgbl-root .pgbl-modal--blacklist > .pgbl-modal__body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#pgbl-root .pgbl-panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  min-height: 0;
+}
+
+#pgbl-root .pgbl-management-actions:not([hidden]) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#pgbl-root .pgbl-settings {
+  display: grid;
+  gap: 8px;
+}
+
+#pgbl-root .pgbl-familiar-settings__toggle,
+#pgbl-root .pgbl-familiar-loading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-top: 1px solid rgba(138, 151, 168, 0.18);
+}
+
+#pgbl-root .pgbl-familiar-settings__toggle {
+  cursor: pointer;
+}
+
+#pgbl-root .pgbl-familiar-settings__toggle input,
+#pgbl-root .pgbl-familiar-loading__option input {
+  margin: 0;
+  accent-color: #c8aa6e;
+  cursor: inherit;
+}
+
+#pgbl-root .pgbl-familiar-loading {
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  color: #a9b4c2;
+  font-size: 12px;
+}
+
+#pgbl-root .pgbl-familiar-loading__choices,
+#pgbl-root .pgbl-familiar-loading__option {
+  display: flex;
+  align-items: center;
+}
+
+#pgbl-root .pgbl-familiar-loading__choices {
+  gap: 16px;
+}
+
+#pgbl-root .pgbl-familiar-loading__option {
+  gap: 6px;
+  color: #f0e6d2;
+  cursor: pointer;
+}
+
+#pgbl-root .pgbl-settings-group {
+  border: 1px solid rgba(138, 151, 168, 0.24);
+  border-radius: 5px;
+}
+
+#pgbl-root .pgbl-settings-group__summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  list-style: none;
+  cursor: pointer;
+}
+
+#pgbl-root .pgbl-settings-group__summary::-webkit-details-marker {
+  display: none;
+}
+
+#pgbl-root .pgbl-settings-group__summary:hover,
+#pgbl-root .pgbl-settings-group__summary:focus-visible {
+  color: #e5c98d;
+}
+
+#pgbl-root .pgbl-settings-group__summary:focus-visible {
+  outline: 1px solid #c8aa6e;
+  outline-offset: -2px;
+  border-radius: 4px;
+}
+
+#pgbl-root .pgbl-settings-group__summary::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  margin: -3px 3px 0 1px;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  color: #a9b4c2;
+  transform: rotate(45deg);
+}
+
+#pgbl-root .pgbl-settings-group[open] > .pgbl-settings-group__summary::after {
+  margin-top: 3px;
+  transform: rotate(225deg);
+}
+
+#pgbl-root .pgbl-settings-group__status {
+  margin-left: auto;
+  color: #a9b4c2;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+#pgbl-root .pgbl-settings-group__status.is-enabled {
+  color: #e5c98d;
+}
+
+#pgbl-root .pgbl-test-settings__matrix {
+  width: calc(100% - 20px);
+  margin: 0 10px 8px;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+#pgbl-root .pgbl-test-settings__matrix th,
+#pgbl-root .pgbl-test-settings__matrix td {
+  padding: 0;
+  border-top: 1px solid rgba(138, 151, 168, 0.18);
+}
+
+#pgbl-root .pgbl-test-settings__matrix thead th {
+  padding: 5px 0;
+  color: #a9b4c2;
+  font-weight: 400;
+  text-align: center;
+}
+
+#pgbl-root .pgbl-test-settings__matrix tbody th {
+  font-weight: 500;
+  text-align: left;
+}
+
+#pgbl-root .pgbl-test-settings__cell {
+  display: grid;
+  place-items: center;
+  min-height: 34px;
+  cursor: pointer;
+}
+
+#pgbl-root .pgbl-test-settings__cell:hover,
+#pgbl-root .pgbl-test-settings__cell:focus-within,
+#pgbl-root .pgbl-test-settings__cell:has(input:checked) {
+  background: rgba(200, 170, 110, 0.08);
+}
+
+#pgbl-root .pgbl-test-settings__cell input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: #c8aa6e;
+  cursor: inherit;
+}
+
+#pgbl-root .pgbl-settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+#pgbl-root .pgbl-settings-status {
+  color: #a9b4c2;
+}
+
+#pgbl-root .pgbl-tabs {
+  display: flex;
+  flex: none;
+  gap: 4px;
+  border-bottom: 1px solid rgba(200, 170, 110, 0.18);
+}
+
+#pgbl-root .pgbl-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: #8a97a8;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+#pgbl-root .pgbl-tab:hover {
+  color: #c8aa6e;
+}
+
+#pgbl-root .pgbl-tab.is-active {
+  border-bottom-color: #c8aa6e;
+  color: #f0e6d2;
+}
+
+#pgbl-root .pgbl-tab__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: 8px;
+  background: rgba(200, 170, 110, 0.14);
+  color: #c8aa6e;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+#pgbl-root .pgbl-panel-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding-right: 4px;
+}
+
+#pgbl-root .pgbl-panel-content > * {
+  flex-shrink: 0;
+}
+
+#pgbl-root .pgbl-panel-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+#pgbl-root .pgbl-panel-content::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: rgba(200, 170, 110, 0.3);
+}
+
+#pgbl-root .pgbl-search {
+  width: 100%;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid rgba(138, 151, 168, 0.3);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #f0e6d2;
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+}
+
+#pgbl-root .pgbl-search:focus {
+  border-color: rgba(200, 170, 110, 0.6);
+}
+
+#pgbl-root .pgbl-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#pgbl-root .pgbl-card {
+  padding: 10px 12px;
+  border: 1px solid rgba(138, 151, 168, 0.18);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+#pgbl-root .pgbl-card--hit {
+  border-color: rgba(224, 90, 90, 0.4);
+  background: rgba(224, 90, 90, 0.07);
+}
+
+#pgbl-root .pgbl-card__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+#pgbl-root .pgbl-card__name {
+  overflow: hidden;
+  color: #f0e6d2;
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#pgbl-root .pgbl-card__champion-history {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+#pgbl-root .pgbl-card__champion {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 5px 10px 5px 6px;
+  border: 1px solid rgba(200, 170, 110, 0.38);
+  border-radius: 5px;
+  background: rgba(200, 170, 110, 0.12);
+}
+
+#pgbl-root .pgbl-card__portrait {
+  display: block;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 3px;
+  object-fit: cover;
+}
+
+#pgbl-root .pgbl-card__champion-label {
+  color: #c6b99e;
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+#pgbl-root .pgbl-card__champion-name {
+  min-width: 0;
+  color: #f7dfa8;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+#pgbl-root .pgbl-card__champion-history--empty {
+  flex-flow: row wrap;
+  align-items: baseline;
+  gap: 2px 6px;
+}
+
+#pgbl-root .pgbl-card__champion-history--empty .pgbl-card__champion-label,
+#pgbl-root .pgbl-card__champion-history--empty .pgbl-card__champion-name,
+#pgbl-root .pgbl-card__current-champion {
+  color: #a9b4c2;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+#pgbl-root .pgbl-card__current-champion {
+  margin-top: 4px;
+}
+
+#pgbl-root .pgbl-card__reason {
+  margin-top: 5px;
+  color: #d6dbe3;
+  font-size: 12px;
+  word-break: break-word;
+}
+
+#pgbl-root .pgbl-card__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 5px;
+  color: #6f7b8b;
+  font-size: 11px;
+}
+
+#pgbl-root .pgbl-card__time {
+  flex: 0 0 auto;
+}
+
+#pgbl-root .pgbl-card__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+#pgbl-root .pgbl-tag {
+  padding: 1px 7px;
+  border: 1px solid rgba(200, 170, 110, 0.35);
+  border-radius: 9px;
+  background: rgba(200, 170, 110, 0.08);
+  color: #c8aa6e;
+  font-size: 10px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+#pgbl-root .pgbl-tag--danger {
+  border-color: rgba(224, 90, 90, 0.5);
+  background: rgba(224, 90, 90, 0.12);
+  color: #ff8f8f;
+}
+
+#pgbl-root .pgbl-tag--info {
+  border-color: rgba(90, 166, 224, 0.55);
+  background: rgba(90, 166, 224, 0.12);
+  color: #9fd2ff;
+}
+
+#pgbl-root .pgbl-tag--ally {
+  border-color: rgba(90, 200, 140, 0.5);
+  background: rgba(90, 200, 140, 0.12);
+  color: #8fe0b4;
+}
+
+#pgbl-root .pgbl-tag--enemy {
+  border-color: rgba(224, 160, 90, 0.5);
+  background: rgba(224, 160, 90, 0.12);
+  color: #ffc98f;
+}
+
+/* ------------------------------ 分组标题 ------------------------------ */
+
+#pgbl-root .pgbl-section-title {
+  margin-top: 2px;
+  color: #8a97a8;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+#pgbl-root .pgbl-card--familiar {
+  border-color: rgba(90, 166, 224, 0.35);
+  background: rgba(90, 166, 224, 0.06);
+}
+
+#pgbl-root .pgbl-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 34px 10px;
+  color: #6f7b8b;
+  text-align: center;
+}
+
+#pgbl-root .pgbl-empty__icon {
+  font-size: 26px;
+  opacity: 0.5;
+}
+
+#pgbl-root .pgbl-empty__title {
+  color: #a9b4c2;
+  font-size: 13px;
+}
+
+#pgbl-root .pgbl-empty__hint {
+  font-size: 11px;
+}
+
+/* ------------------------------ 聊天框本地提示行 ------------------------------ */
+
+.pgbl-chat-line {
+  position: fixed;
+  z-index: 2147483000;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 3px 8px;
+  border-left: 3px solid #e05a5a;
+  border-radius: 3px;
+  background: rgba(10, 12, 18, 0.86);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  color: #f0e6d2;
+  font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  pointer-events: none;
+}
+
+.pgbl-chat-line__tag {
+  flex: 0 0 auto;
+  color: #ff8f8f;
+  font-weight: 600;
+}
+
+.pgbl-chat-line__tag::after {
+  content: '：';
+}
+
+.pgbl-chat-line__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ------------------------------ 私密提醒卡 ------------------------------ */
+
+.pgbl-hint {
+  position: fixed;
+  width: 268px;
+  padding: 10px 12px;
+  border: 1px solid rgba(224, 90, 90, 0.55);
+  border-radius: 6px;
+  background: linear-gradient(160deg, rgba(28, 18, 20, 0.97), rgba(10, 12, 18, 0.97));
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+  pointer-events: none; /* 未显示时绝不拦截点击 */
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.pgbl-hint--in {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.pgbl-hint__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pgbl-hint__icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.pgbl-hint__title {
+  flex: 1;
+  color: #ff9a9a;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pgbl-hint__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: #e05a5a;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.pgbl-hint__close {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: #8a97a8;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pgbl-hint__close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f0e6d2;
+}
+
+.pgbl-hint__list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 6px;
+}
+
+.pgbl-hint__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.pgbl-hint__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: #f0e6d2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pgbl-hint__reason {
+  flex: 0 0 auto;
+  max-width: 110px;
+  overflow: hidden;
+  color: #e08a8a;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pgbl-hint__reason--familiar {
+  max-width: 130px;
+  color: #9fd2ff;
+}
+
+.pgbl-hint__dot {
+  flex: 0 0 auto;
+  align-self: center;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e05a5a;
+}
+
+.pgbl-hint__dot--danger {
+  background: #e05a5a;
+}
+
+.pgbl-hint__dot--familiar {
+  background: #5aa6e0;
+}
+
+.pgbl-hint__more {
+  margin-top: 4px;
+  color: #8a97a8;
+  font-size: 11px;
+}
+
+.pgbl-hint__footer {
+  margin-top: 7px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(200, 170, 110, 0.15);
+  color: #6f7b8b;
+  font-size: 10px;
+}
+
+/* ------------------------------ 注入到对局名单的按钮 ------------------------------
+   这些按钮被插在客户端自己的 DOM 里，不在 #pgbl-root 下，
+   所以关键属性用 !important 压过客户端全局样式。
+   -------------------------------------------------------------------------- */
+
+.pgbl-add {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto !important;
+  height: 18px !important;
+  margin: 0 0 0 6px !important;
+  padding: 0 6px !important;
+  border: 1px solid rgba(200, 170, 110, 0.65) !important;
+  border-radius: 3px !important;
+  background: rgba(0, 0, 0, 0.35) !important;
+  color: #c8aa6e !important;
+  font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif !important;
+  font-size: 11px !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  cursor: pointer !important;
+  transition: background 0.12s ease, color 0.12s ease !important;
+  transform: none !important;
+}
+
+.pgbl-add:hover {
+  background: #c8aa6e !important;
+  color: #0b0f16 !important;
+}
+
+.pgbl-add.is-blacklisted {
+  border-color: rgba(224, 90, 90, 0.7) !important;
+  color: #ff8f8f !important;
+}
+
+.pgbl-add.is-blacklisted:hover {
+  background: rgba(224, 90, 90, 0.9) !important;
+  color: #fff !important;
+}
+
+/* 找不到名字节点时，退化成挂在整行末尾 */
+.pgbl-add--row {
+  margin-left: auto !important;
+}
+
+/* 停靠在行尾的定位按钮（position 与坐标由 JS 按视口坐标写入） */
+.pgbl-add--end {
+  position: fixed;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+  z-index: 2;
+}
+
+/* 新版结算页：KDA 左侧的定位按钮，必须完全脱离文档流 */
+.pgbl-add--kda {
+  position: fixed !important;
+  right: auto;
+  margin: 0 !important;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+/* 新版结算页：行是 flex 布局，按钮直接作为最后一个子项跟在行尾 */
+.pgbl-add--inline {
+  position: static !important;
+  align-self: center !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  transform: none !important;
+}

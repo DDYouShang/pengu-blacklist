@@ -1,0 +1,37 @@
+{
+  "teamChatNotice": false,
+  "chatMessage": "⚠️ 黑名单提醒：{list}",
+  "privateHint": {
+    "enabled": true,
+    "top": 76,
+    "right": 12,
+    "duration": 12000
+  },
+  "chatLine": true,
+  "scanInterval": 1500,
+  "alwaysShowLauncher": false,
+  "launcher": {
+    "top": 96,
+    "right": 320
+  },
+  "encounters": {
+    "enabled": true,
+    "lookbackGames": 5,
+    "lookbackDays": 90,
+    "scope": "both",
+    "includeSelf": false
+  },
+  "notify": {
+    "focusClient": true,
+    "delayMs": 4000,
+    "panelAutoCloseMs": 20000
+  },
+  "pages": {
+    "matchHistory": {
+      "selectors": []
+    },
+    "endOfGame": {
+      "selectors": []
+    }
+  }
+}
