@@ -32,12 +32,6 @@
 
 截图使用示例玩家和对局。英雄头像来自 Riot Data Dragon。 [Data Dragon 文档](https://developer.riotgames.com/docs/lol#data-dragon)
 
-### 选人提醒
-
-识别到黑名单玩家时，提醒卡显示玩家的 Riot ID 和拉黑原因。点击提醒可以查看本局命中。
-
-![选人阶段显示黑名单命中提醒](docs/screenshots/champion-select-hit.png)
-
 ### 聊天框旁的提示
 
 命中提示显示在聊天输入框上方，仅自己可见。
